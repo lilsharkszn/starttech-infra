@@ -29,7 +29,7 @@ module "networking" {
 module "storage" {
   source = "./modules/storage"
 
-  environment       = var.environment
+  environment = var.environment
 
   # ── will  Set to true once AWS verifies my account ───
   enable_cloudfront = var.enable_cloudfront
