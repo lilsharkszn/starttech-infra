@@ -1,0 +1,320 @@
+{
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 24,
+      "height": 1,
+      "properties": {
+        "markdown": "# StartTech Application Dashboard — dev environment"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 1,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Backend EC2 — CPU Utilization",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/EC2",
+            "CPUUtilization",
+            "AutoScalingGroupName",
+            "dev-backend-asg",
+            { "label": "CPU %" }
+          ]
+        ],
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Scale-out threshold",
+              "value": 80,
+              "color": "#ff6961"
+            }
+          ]
+        },
+        "yAxis": {
+          "left": { "min": 0, "max": 100 }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 1,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Backend EC2 — Memory Utilization",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "StartTech/Backend",
+            "mem_used_percent",
+            { "label": "Memory %" }
+          ]
+        ],
+        "yAxis": {
+          "left": { "min": 0, "max": 100 }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 7,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB — Request Count",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Sum",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "RequestCount",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "Requests" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 7,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB — HTTP 5XX Errors",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Sum",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "HTTPCode_ELB_5XX_Count",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "5XX Errors", "color": "#ff6961" }
+          ],
+          [
+            "AWS/ApplicationELB",
+            "HTTPCode_ELB_4XX_Count",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "4XX Errors", "color": "#ffb347" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 7,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB — Target Response Time (p99)",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "p99",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "TargetResponseTime",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "p99 Latency (s)" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 13,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "ALB — Healthy vs Unhealthy Targets",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "HealthyHostCount",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "Healthy", "color": "#77dd77" }
+          ],
+          [
+            "AWS/ApplicationELB",
+            "UnHealthyHostCount",
+            "LoadBalancer",
+            "app/dev-backend-alb/b47618a0ce377ab3",
+            { "label": "Unhealthy", "color": "#ff6961" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 13,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Redis — CPU Utilization",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ElastiCache",
+            "CPUUtilization",
+            "ReplicationGroupId",
+            "dev-redis",
+            { "label": "Redis CPU %" }
+          ]
+        ],
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Alert threshold",
+              "value": 75,
+              "color": "#ff6961"
+            }
+          ]
+        },
+        "yAxis": {
+          "left": { "min": 0, "max": 100 }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 19,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Redis — Cache Hit Rate",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ElastiCache",
+            "CacheHits",
+            "ReplicationGroupId",
+            "dev-redis",
+            { "label": "Cache Hits", "color": "#77dd77" }
+          ],
+          [
+            "AWS/ElastiCache",
+            "CacheMisses",
+            "ReplicationGroupId",
+            "dev-redis",
+            { "label": "Cache Misses", "color": "#ffb347" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 19,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Redis — Current Connections",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ElastiCache",
+            "CurrConnections",
+            "ReplicationGroupId",
+            "dev-redis",
+            { "label": "Connections" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 25,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "title": "Backend — Recent Error Logs",
+        "region": "us-east-1",
+        "query": "SOURCE '/starttech/backend' | fields @timestamp, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 50",
+        "view": "table"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 31,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "title": "ASG — Instance Count",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/AutoScaling",
+            "GroupInServiceInstances",
+            "AutoScalingGroupName",
+            "dev-backend-asg",
+            { "label": "In Service" }
+          ],
+          [
+            "AWS/AutoScaling",
+            "GroupDesiredCapacity",
+            "AutoScalingGroupName",
+            "dev-backend-asg",
+            { "label": "Desired" }
+          ]
+        ]
+      }
+    }
+  ]
+}

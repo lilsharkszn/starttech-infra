@@ -1,0 +1,18 @@
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/tfplan
+terraform/terraform.tfvars
+terraform/console.log
+
+# SSH Keys — NEVER commit private keys
+terraform/*.pem
+*.pem
+
+# Terraform state — managed remotely in S3
+terraform/*.tfstate
+terraform/*.tfstate.backup
+
+# OS
+.DS_Store
+*.log

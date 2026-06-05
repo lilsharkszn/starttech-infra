@@ -1,0 +1,17 @@
+provider "mongodbatlas" {
+  public_key  = var.atlas_public_key
+  private_key = var.atlas_private_key
+}
+
+resource "mongodbatlas_project" "dev" {
+  name   = "starttech-dev"
+  org_id = var.atlas_org_id
+}
+
+resource "mongodbatlas_cluster" "dev" {
+  project_id   = mongodbatlas_project.dev.id
+  name         = "muchtodo-cluster"
+  cluster_type = "REPLICASET"
+  provider_name = "AWS"
+  provider_region_name = "US_EAST_1"
+}

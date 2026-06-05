@@ -1,0 +1,112 @@
+# ============================================================
+# StartTech — CloudWatch Logs Insights Queries
+# Log Group: /starttech/backend
+# ============================================================
+# Usage: AWS Console → CloudWatch → Logs Insights
+#        Select log group: /starttech/backend
+#        Paste query → Run
+# ============================================================
+
+
+# ── 1. All ERROR logs in the last hour ─────────────────────
+# Shows every error with timestamp and message
+# Time range: Last 1 hour
+
+fields @timestamp, @message, @logStream
+| filter @message like /(?i)ERROR/
+| sort @timestamp desc
+| limit 100
+
+
+# ── 2. Request count by HTTP status code ───────────────────
+# Useful for spotting sudden spikes in 4xx or 5xx responses
+# Time range: Last 3 hours
+
+fields @timestamp, @message
+| filter @message like /HTTP/
+| parse @message '"status":*,' as status
+| stats count() as request_count by status
+| sort request_count desc
+
+
+# ── 3. Top 10 slowest API requests ─────────────────────────
+# Finds endpoints with highest response latency
+# Time range: Last 1 hour
+
+fields @timestamp, @message
+| filter @message like /latency/
+| parse @message '"latency_ms":*,' as latency_ms
+| parse @message '"path":"*"' as path
+| sort latency_ms desc
+| limit 10
+
+
+# ── 4. Application startup & init events ───────────────────
+# Useful for verifying new instances bootstrapped correctly
+# Time range: Last 6 hours
+
+fields @timestamp, @message, @logStream
+| filter @logStream like /init/
+| sort @timestamp desc
+| limit 50
+
+
+# ── 5. MongoDB connection errors ───────────────────────────
+# Detects database connectivity issues early
+# Time range: Last 1 hour
+
+fields @timestamp, @message
+| filter @message like /(?i)(mongo|database|db)/
+| filter @message like /(?i)(error|failed|timeout|refused)/
+| sort @timestamp desc
+| limit 50
+
+
+# ── 6. Redis cache errors ──────────────────────────────────
+# Monitors cache layer health
+# Time range: Last 1 hour
+
+fields @timestamp, @message
+| filter @message like /(?i)(redis|cache)/
+| filter @message like /(?i)(error|failed|timeout|refused)/
+| sort @timestamp desc
+| limit 50
+
+
+# ── 7. Authentication failures ─────────────────────────────
+# Monitors for brute force or invalid token usage
+# Time range: Last 1 hour
+
+fields @timestamp, @message
+| filter @message like /(?i)(unauthorized|invalid token|auth|jwt)/
+| filter @message like /(?i)(error|failed|invalid|expired)/
+| stats count() as failure_count by bin(5m)
+| sort @timestamp desc
+
+
+# ── 8. Error rate over time ────────────────────────────────
+# Visualise error frequency — good for CloudWatch dashboard widget
+# Time range: Last 3 hours
+
+fields @timestamp, @message
+| filter @message like /(?i)ERROR/
+| stats count() as error_count by bin(1m)
+| sort @timestamp asc
+
+
+# ── 9. Instance-level log activity ─────────────────────────
+# Breaks down log volume per EC2 instance
+# Time range: Last 1 hour
+
+fields @timestamp, @logStream
+| stats count() as log_count by @logStream
+| sort log_count desc
+
+
+# ── 10. Full request trace for a specific request ID ────────
+# Replace REQUEST_ID with actual value from another query
+# Time range: Last 24 hours
+
+fields @timestamp, @message
+| filter @message like "REQUEST_ID"
+| sort @timestamp asc

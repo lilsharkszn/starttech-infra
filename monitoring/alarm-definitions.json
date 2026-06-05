@@ -1,0 +1,124 @@
+{
+  "alarms": [
+    {
+      "AlarmName": "dev-alb-5xx-errors",
+      "AlarmDescription": "ALB is returning too many 5XX errors — possible application crash or backend unavailability",
+      "Namespace": "AWS/ApplicationELB",
+      "MetricName": "HTTPCode_ELB_5XX_Count",
+      "Dimensions": [
+        {
+          "Name": "LoadBalancer",
+          "Value": "app/dev-backend-alb/b47618a0ce377ab3"
+        }
+      ],
+      "Statistic": "Sum",
+      "Period": 60,
+      "EvaluationPeriods": 2,
+      "Threshold": 10,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "TreatMissingData": "notBreaching",
+      "Severity": "HIGH",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#alb-5xx-errors"
+    },
+    {
+      "AlarmName": "dev-backend-high-cpu",
+      "AlarmDescription": "Backend ASG CPU is above 80% — scaling may be required",
+      "Namespace": "AWS/EC2",
+      "MetricName": "CPUUtilization",
+      "Dimensions": [
+        {
+          "Name": "AutoScalingGroupName",
+          "Value": "dev-backend-asg"
+        }
+      ],
+      "Statistic": "Average",
+      "Period": 120,
+      "EvaluationPeriods": 2,
+      "Threshold": 80,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "TreatMissingData": "notBreaching",
+      "Severity": "MEDIUM",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#high-cpu"
+    },
+    {
+      "AlarmName": "dev-backend-unhealthy-hosts",
+      "AlarmDescription": "One or more backend targets are unhealthy behind the ALB",
+      "Namespace": "AWS/ApplicationELB",
+      "MetricName": "UnHealthyHostCount",
+      "Dimensions": [
+        {
+          "Name": "LoadBalancer",
+          "Value": "app/dev-backend-alb/b47618a0ce377ab3"
+        }
+      ],
+      "Statistic": "Average",
+      "Period": 60,
+      "EvaluationPeriods": 2,
+      "Threshold": 0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "TreatMissingData": "notBreaching",
+      "Severity": "HIGH",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#unhealthy-hosts"
+    },
+    {
+      "AlarmName": "dev-redis-high-cpu",
+      "AlarmDescription": "Redis CPU is above 75% — cache performance may be degraded",
+      "Namespace": "AWS/ElastiCache",
+      "MetricName": "CPUUtilization",
+      "Dimensions": [
+        {
+          "Name": "ReplicationGroupId",
+          "Value": "dev-redis"
+        }
+      ],
+      "Statistic": "Average",
+      "Period": 120,
+      "EvaluationPeriods": 2,
+      "Threshold": 75,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "TreatMissingData": "notBreaching",
+      "Severity": "MEDIUM",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#redis-high-cpu"
+    },
+    {
+      "AlarmName": "dev-alb-high-latency",
+      "AlarmDescription": "ALB p99 response time is above 2 seconds — backend performance degradation",
+      "Namespace": "AWS/ApplicationELB",
+      "MetricName": "TargetResponseTime",
+      "Dimensions": [
+        {
+          "Name": "LoadBalancer",
+          "Value": "app/dev-backend-alb/b47618a0ce377ab3"
+        }
+      ],
+      "ExtendedStatistic": "p99",
+      "Period": 60,
+      "EvaluationPeriods": 3,
+      "Threshold": 2,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "TreatMissingData": "notBreaching",
+      "Severity": "MEDIUM",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#high-latency"
+    },
+    {
+      "AlarmName": "dev-asg-min-capacity",
+      "AlarmDescription": "ASG has fewer in-service instances than the minimum expected — possible instance failure",
+      "Namespace": "AWS/AutoScaling",
+      "MetricName": "GroupInServiceInstances",
+      "Dimensions": [
+        {
+          "Name": "AutoScalingGroupName",
+          "Value": "dev-backend-asg"
+        }
+      ],
+      "Statistic": "Average",
+      "Period": 60,
+      "EvaluationPeriods": 2,
+      "Threshold": 2,
+      "ComparisonOperator": "LessThanThreshold",
+      "TreatMissingData": "breaching",
+      "Severity": "CRITICAL",
+      "RunbookUrl": "https://github.com/YOUR_ORG/starttech-infra/blob/main/RUNBOOK.md#asg-capacity"
+    }
+  ]
+}

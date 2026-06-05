@@ -1,0 +1,100 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  STARTTECH INFRASTRUCTURE PROOF
+  Date: Fri Jun  5 22:16:30 UTC 2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+=== 01. ASG INSTANCES ===
+---------------------------------------------------
+|            DescribeAutoScalingGroups            |
++-----------+-------+-------+---------------------+
+|  Desired  |  Max  |  Min  |        Name         |
++-----------+-------+-------+---------------------+
+|  2        |  4    |  2    |  dev-backend-asg    |
++-----------+-------+-------+---------------------+
+||                   Instances                   ||
+|+---------+-----------------------+-------------+|
+|| Health  |          ID           |    State    ||
+|+---------+-----------------------+-------------+|
+||  Healthy|  i-0ac357dee8007f626  |  InService  ||
+||  Healthy|  i-0ed6bd59cc3432eb5  |  InService  ||
+|+---------+-----------------------+-------------+|
+
+=== 02. ALB TARGET HEALTH ===
+-----------------------------------------------------------
+|                  DescribeTargetHealth                   |
++--------------+-----------------------+-------+----------+
+|  Description |       Instance        | Port  |  State   |
++--------------+-----------------------+-------+----------+
+|  None        |  i-0ac357dee8007f626  |  8080 |  healthy |
+|  None        |  i-0ed6bd59cc3432eb5  |  8080 |  healthy |
++--------------+-----------------------+-------+----------+
+
+=== 03. ECR IMAGES ===
+------------
+|ListImages|
++----------+
+|    Tag   |
++----------+
+|  latest  |
++----------+
+
+=== 04. S3 BUCKET STATUS ===
+Bucket: dev-starttech-frontend-jare-1
+{
+    "Status": "Enabled"
+}
+AES256
+Note: Frontend files deployed after app repo pipeline runs
+
+=== 05. CLOUDWATCH DASHBOARD ===
+----------------------------------------------------------
+|                     ListDashboards                     |
++----------------------------+---------------------------+
+|        LastModified        |           Name            |
++----------------------------+---------------------------+
+|  2026-06-04T09:01:18+01:00 |  dev-starttech-dashboard  |
++----------------------------+---------------------------+
+
+=== 06. CLOUDWATCH LOG GROUP ===
+--------------------------------------------------------
+|                   DescribeLogGroups                  |
++--------------------+-----------------+---------------+
+|        Name        |  RetentionDays  |  StoredBytes  |
++--------------------+-----------------+---------------+
+|  /starttech/backend|  14             |  0            |
++--------------------+-----------------+---------------+
+
+=== 07. REDIS CLUSTER ===
+----------------------------------------------------------------------
+|                      DescribeReplicationGroups                     |
++--------------+-----------------------------------------------------+
+|  AutoFailover|  enabled                                            |
+|  Endpoint    |  master.dev-redis.cbgrbt.use1.cache.amazonaws.com   |
+|  ID          |  dev-redis                                          |
+|  MultiAZ     |  enabled                                            |
+|  Status      |  available                                          |
++--------------+-----------------------------------------------------+
+
+=== 08. CLOUDWATCH ALARMS ===
+--------------------------------------------------------------------------
+|                             DescribeAlarms                             |
++-------------------------+------------------------+--------+------------+
+|         Metric          |         Name           | State  | Threshold  |
++-------------------------+------------------------+--------+------------+
+|  HTTPCode_ELB_5XX_Count |  dev-alb-5xx-errors    |  OK    |  10.0      |
+|  CPUUtilization         |  dev-backend-high-cpu  |  OK    |  80.0      |
+|  CPUUtilization         |  dev-redis-high-cpu    |  OK    |  75.0      |
++-------------------------+------------------------+--------+------------+
+
+=== 09. TERRAFORM OUTPUTS ===
+alb_arn_suffix = "app/dev-backend-alb/b47618a0ce377ab3"
+alb_dns_name = "dev-backend-alb-2008053916.us-east-1.elb.amazonaws.com"
+backend_log_group_name = "/starttech/backend"
+ecr_repository_url = "225201316405.dkr.ecr.us-east-1.amazonaws.com/dev-starttech-backend"
+frontend_bucket_name = "dev-starttech-frontend-jare-1"
+redis_endpoint = "master.dev-redis.cbgrbt.use1.cache.amazonaws.com"
+redis_replication_group_id = "dev-redis"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  END OF PROOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
