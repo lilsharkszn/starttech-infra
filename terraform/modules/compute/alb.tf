@@ -28,7 +28,7 @@ resource "aws_lb_target_group" "backend" {
   vpc_id = var.vpc_id
 
   health_check {
-    path = "/ping"
+    path = "/health"
 
     protocol = "HTTP"
 

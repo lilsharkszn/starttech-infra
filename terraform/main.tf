@@ -62,7 +62,7 @@ module "compute" {
   alb_security_group_id     = module.networking.sg_alb_id
   instance_type             = "t3.micro"
   ami_id                    = "ami-084568db4383264d4"
-  key_name                  = "adejare"
+  key_name                  = "starttech-key"
 
   mongo_uri      = var.mongo_uri
   db_name        = var.db_name

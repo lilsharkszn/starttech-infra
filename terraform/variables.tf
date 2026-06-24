@@ -31,5 +31,5 @@ variable "jwt_secret_key" {
 variable "enable_cloudfront" {
   description = "Enable CloudFront distribution — requires verified AWS account"
   type        = bool
-  default     = false
+  default     = true
 }

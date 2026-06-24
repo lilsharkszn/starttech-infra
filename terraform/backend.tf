@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket       = "adejare-starttech-tf-state"
+    bucket       = "hassan-starttech-tf-state"
     key          = "global/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true

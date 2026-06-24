@@ -17,11 +17,11 @@ resource "aws_launch_template" "backend" {
     name = aws_iam_instance_profile.ec2_profile.name
   }
 
-  user_data = base64encode(<<-EOF
+  user_data = base64encode(<<-USERDATA
 #!/bin/bash
 set -xe
 
-# ── System update & dependencies ──────────────────────────
+# System update & dependencies
 apt-get update -y
 apt-get install -y docker.io git jq curl unzip wget
 
@@ -32,18 +32,17 @@ usermod -aG docker ubuntu
 mkdir -p /opt/starttech
 mkdir -p /var/log/starttech
 
-# ── AWS CLI v2 ─────────────────────────────────────────────
+# AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
 cd /tmp && unzip -o awscliv2.zip
 /tmp/aws/install
 aws --version
 
-# ── CloudWatch Agent ───────────────────────────────────────
+# CloudWatch Agent
 wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb \
   -O /tmp/amazon-cloudwatch-agent.deb
 dpkg -i /tmp/amazon-cloudwatch-agent.deb
 
-# CloudWatch agent configuration
 cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'
 {
   "logs": {
@@ -98,26 +97,27 @@ CWCONFIG
   -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
   -s
 
-# ── ECR Login (dynamic registry, no hardcoded account ID) ──
+# ECR Login
 ECR_REGISTRY="${local.ecr_registry}"
 aws ecr get-login-password --region ${var.aws_region} | docker login \
   --username AWS \
   --password-stdin "$ECR_REGISTRY"
 
-# ── Application environment ────────────────────────────────
-cat > /opt/starttech/.env << ENV
+# Application environment
+cat > /opt/starttech/.env << ENVFILE
 PORT=8080
 MONGO_URI=${var.mongo_uri}
 DB_NAME=${var.db_name}
 JWT_SECRET_KEY=${var.jwt_secret_key}
 REDIS_ADDR=${var.redis_endpoint}:6379
 REDIS_PASSWORD=
+REDIS_TLS=true
 ENABLE_CACHE=true
 LOG_LEVEL=info
 LOG_FORMAT=json
-ENV
+ENVFILE
 
-# ── Pull & run application ─────────────────────────────────
+# Pull & run application
 docker pull ${var.ecr_repository_url}:latest
 
 docker rm -f muchtodo-backend || true
@@ -132,8 +132,8 @@ docker run -d \
   --log-opt max-file=3 \
   ${var.ecr_repository_url}:latest
 
-# ── Verify container started ───────────────────────────────
-sleep 10
+# Verify container started
+sleep 15
 if docker ps | grep -q muchtodo-backend; then
   echo "$(date -Iseconds) [INFO] StartTech backend launched successfully" >> /var/log/starttech/init.log
 else
@@ -141,7 +141,7 @@ else
   docker logs muchtodo-backend >> /var/log/starttech/error.log 2>&1
   exit 1
 fi
-EOF
+USERDATA
   )
 
   tag_specifications {

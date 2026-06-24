@@ -7,19 +7,31 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to run'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
 
 env:
   AWS_REGION: us-east-1
   TF_VERSION: "1.10.3"
 
 jobs:
-  # ─────────────────────────────────────────────────────────────
-  # JOB 1: Lint, Validate, Security Scan, Plan
-  # Runs on all pushes and PRs to main
-  # ─────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────
+  # JOB 1: Plan + Security Scan
+  # Runs on push, PR, and manual dispatch (plan/apply)
+  # ───────────────────────────────────────────────────────
   terraform-plan:
     name: Terraform Plan & Security Scan
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.action != 'destroy'
 
     defaults:
       run:
@@ -59,7 +71,7 @@ jobs:
         with:
           working_directory: terraform
           minimum_severity: HIGH
-          soft_fail: true   # Non-blocking in dev — harden to false in prod
+          soft_fail: true
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan -input=false
@@ -69,19 +81,20 @@ jobs:
         with:
           name: terraform-plan
           path: terraform/tfplan
-          retention-days: 1   # Plan is only valid for the current apply run
+          retention-days: 1
 
-  # ─────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────
   # JOB 2: Apply
-  # Only runs on direct push to main (not PRs)
-  # Requires the plan artifact from Job 1
-  # ─────────────────────────────────────────────────────────────
+  # Push to main OR manual dispatch with action=apply
+  # ───────────────────────────────────────────────────────
   terraform-apply:
     name: Terraform Apply
     needs: terraform-plan
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     runs-on: ubuntu-latest
-    environment: production   # Enables manual approval gate in GitHub env settings
+    environment: production
 
     defaults:
       run:
@@ -114,7 +127,57 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: terraform-plan
-          path: terraform/   # Downloads tfplan into the terraform/ directory
+          path: terraform/
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false tfplan
+
+  # ───────────────────────────────────────────────────────
+  # JOB 3: Destroy
+  # ONLY runs on manual dispatch with action=destroy
+  # Has its own environment gate for safety
+  # ───────────────────────────────────────────────────────
+  terraform-destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    environment: production
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    env:
+      TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
+      TF_VAR_jwt_secret_key: ${{ secrets.JWT_SECRET_KEY }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
+
+      - name: Destroy Summary
+        if: success()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Infrastructure destroyed successfully"
+          echo "Actor  : ${{ github.actor }}"
+          echo "Commit : ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
